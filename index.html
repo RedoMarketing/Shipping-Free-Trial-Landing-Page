@@ -1413,26 +1413,43 @@
             </label>
           </div>
           <label class="m-tf-field">
+            <span>Company <em>*</em></span>
+            <input type="text" name="company" required autocomplete="organization" />
+          </label>
+          <label class="m-tf-field">
             <span>Email <em>*</em></span>
             <input type="email" name="email" required autocomplete="email" />
           </label>
           <label class="m-tf-field">
-            <span>Password <em>*</em></span>
-            <input type="password" name="password" required minlength="8" autocomplete="new-password" />
+            <span>Phone</span>
+            <input type="tel" name="phone" inputmode="tel" autocomplete="tel" />
           </label>
           <label class="m-tf-field">
-            <span>Current monthly shipments <em>*</em></span>
-            <select name="shipmentVolume" required>
-              <option value="" disabled selected>Select your monthly shipment volume</option>
-              <option value="50">50 or less, just getting started</option>
-              <option value="500">51&ndash;500 shipments</option>
-              <option value="2000">501&ndash;2,000 shipments</option>
-              <option value="7500">2,001&ndash;7,500 shipments</option>
-              <option value="7501">7,501+ shipments</option>
+            <span>Number of online orders last year <em>*</em></span>
+            <select name="annualOrderVolume" required>
+              <option value="" disabled selected>Number of online orders last year</option>
+              <option value="1200">0 &ndash; 1,200</option>
+              <option value="24000">1,200 &ndash; 24,000</option>
+              <option value="120000">24,001 &ndash; 120,000</option>
+              <option value="120001">120,001+</option>
+            </select>
+          </label>
+          <label class="m-tf-field">
+            <span>How did you hear about us?</span>
+            <select name="hdyhau">
+              <option value="" disabled selected>Select an option</option>
+              <option value="Search Engine">Search Engine</option>
+              <option value="Social Media">Social Media</option>
+              <option value="Event or Webinar">Event or Webinar</option>
+              <option value="Email">Email</option>
+              <option value="Referred By Agency">Referred by an agency</option>
+              <option value="Referred By 3PL">Referred by a 3PL</option>
+              <option value="Recommended by a Friend">Recommended by a friend</option>
+              <option value="Other">Other</option>
             </select>
           </label>
           <button type="submit" class="m-tf-submit">Get started</button>
-          <p class="m-tf-terms">No commitment. No credit card needed. By creating an account, you agree to our <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a> and <a href="#">Carriers&rsquo; Terms</a>.</p>
+          <p class="m-tf-terms">By creating an account, you agree to our <a href="https://redo.com/terms-and-conditions" target="_blank" rel="noopener">Terms of Service</a> and <a href="https://redo.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
         </form>
       </div>
     </div>
@@ -1598,11 +1615,68 @@
 </script>
 
 <script>
-  document.getElementById('tf-form')?.addEventListener('submit', function(e){
-    e.preventDefault();
-    var btn = e.currentTarget.querySelector('.m-tf-submit');
-    if (btn) { btn.textContent = 'Account created'; btn.disabled = true; }
-  });
+  // HubSpot integration for the homepage "Try Redo" form.
+  // Same setup as free-trial.html: POST to HubSpot Forms API, then redirect
+  // to Dom's demo booking calendar regardless of API result.
+  (function(){
+    var form = document.getElementById('tf-form');
+    if (!form) return;
+
+    var HS_PORTAL = '22543403';
+    var HS_FORM   = 'e6692ec9-3bde-4702-8d75-a04658c29a9c';
+    var BOOKING_URL = 'https://meetings.hubspot.com/dom-lewis/donminics-booking-link';
+    // Property internal names + object types:
+    //   - orders_last_year lives on the Company object   (objectTypeId 0-2)
+    //   - how_did_you_hear_about_us lives on the Contact (objectTypeId 0-1)
+    var PROP_ORDER_VOLUME = 'orders_last_year';
+    var PROP_HDYHAU       = 'how_did_you_hear_about_us';
+
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+      var btn = form.querySelector('.m-tf-submit');
+      if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
+
+      var fd = new FormData(form);
+      var allFields = [
+        { objectTypeId: '0-1', name: 'firstname',      value: fd.get('firstName') || '' },
+        { objectTypeId: '0-1', name: 'lastname',       value: fd.get('lastName')  || '' },
+        { objectTypeId: '0-1', name: 'email',          value: fd.get('email')     || '' },
+        { objectTypeId: '0-1', name: 'company',        value: fd.get('company')   || '' },
+        { objectTypeId: '0-1', name: 'phone',          value: fd.get('phone')     || '' },
+        { objectTypeId: '0-2', name: PROP_ORDER_VOLUME, value: fd.get('annualOrderVolume') || '' },
+        { objectTypeId: '0-1', name: PROP_HDYHAU,       value: fd.get('hdyhau') || '' }
+      ];
+      var fields = allFields.filter(function(f){ return f.value !== ''; });
+
+      var payload = {
+        fields: fields,
+        context: {
+          pageUri: window.location.href,
+          pageName: document.title
+        }
+      };
+
+      try {
+        var res = await fetch(
+          'https://api.hsforms.com/submissions/v3/integration/submit/' + HS_PORTAL + '/' + HS_FORM,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }
+        );
+        if (!res.ok) {
+          var body = await res.text();
+          console.error('HubSpot submission failed:', res.status, body);
+        }
+      } catch (err) {
+        console.error('HubSpot submission error:', err);
+      }
+
+      if (btn) btn.textContent = 'Redirecting...';
+      window.location.href = BOOKING_URL;
+    });
+  })();
 
   // Endless feature carousel: clone slides on both sides and jump back invisibly at the edges
   (function(){
