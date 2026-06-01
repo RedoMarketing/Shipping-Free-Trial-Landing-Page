@@ -1,0 +1,13 @@
+.claude/
+.DS_Store
+*.log
+node_modules/
+.env
+.env.local
+
+# Older/unrelated files in this workspace — not part of the landing page
+RESTRUCTURE_PLAN.md
+app.js
+index.html
+plan.html
+playground.html

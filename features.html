@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All features — Redo</title>
+<meta name="description" content="Every Redo Shipping Cloud feature in one place. Auto-batching, scan-to-verify, freight, claims, rate shopping, and more." />
+<link rel="icon" type="image/svg+xml" href="logos/redo-logo.svg" />
+<meta property="og:title" content="All features — Redo" />
+<meta property="og:description" content="Every Redo Shipping Cloud feature in one place." />
+<meta property="og:image" content="logos/order-detail.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="All features — Redo" />
+<meta name="twitter:description" content="Every Redo Shipping Cloud feature in one place." />
+<meta name="twitter:image" content="logos/order-detail.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css?v=mobile-3" />
+<style>
+  body.page-features { background: var(--bg); }
+  /* Hide the page scrollbar */
+  html, body { scrollbar-width: none; -ms-overflow-style: none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+
+  /* Nav (matches mobile home) */
+  .m-nav {
+    position: sticky; top: 0; z-index: 60;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-2);
+  }
+  .m-nav-inner {
+    height: 64px;
+    padding: 0 20px;
+    display: flex; align-items: center; gap: 12px;
+    max-width: 1280px; margin: 0 auto;
+  }
+  .m-nav .brand { flex-shrink: 0; display: inline-flex; align-items: center; }
+  .m-nav .brand img { height: 24px; width: auto; display: block; }
+  .m-nav-spacer { flex: 1; }
+  .m-hamburger {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--ink);
+  }
+
+  /* Filter chips at top center — text-only with orange underline on active */
+  .f-chips {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 20px 16px 8px;
+  }
+  .f-back {
+    position: absolute;
+    left: 16px;
+    top: 20px;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    color: var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s;
+  }
+  .f-back:hover { background: var(--gray-2); }
+  .f-back svg { width: 20px; height: 20px; display: block; }
+  .f-chips-inner {
+    display: inline-flex;
+    gap: 24px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .f-chip {
+    flex-shrink: 0;
+    appearance: none;
+    position: relative;
+    height: 36px;
+    padding: 0 2px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-3);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.15s;
+    letter-spacing: -0.005em;
+  }
+  .f-chip::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform 0.18s ease;
+  }
+  .f-chip:hover { color: var(--ink); }
+  .f-chip.is-active {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .f-chip.is-active::after {
+    transform: scaleX(1);
+  }
+  /* Hidden tiles via filter */
+  .f-tile[hidden] { display: none; }
+
+  /* Tile grid — 2 per row, horizontal pill */
+  .f-grid-wrap {
+    padding: 12px 16px 24px;
+  }
+  .f-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .f-tile {
+    appearance: none;
+    border: 0;
+    padding: 10px 12px 10px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-2);
+    border-radius: 16px;
+    text-align: left;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+    width: 100%;
+    font: inherit;
+    position: relative;
+  }
+  .f-tile-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    line-height: 1.3;
+    box-shadow: 0 2px 6px -1px rgba(255,68,4,.4);
+  }
+  .f-tile:hover { background: var(--gray-3); }
+  .f-tile:active { transform: scale(0.97); }
+  .f-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--bg);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  /* Arbiter icons via CSS mask — color via background so we can tint per-context */
+  .ic {
+    display: block;
+    background: var(--accent);
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
+  .f-icon .ic { width: 22px; height: 22px; }
+
+  .ic-eye                    { -webkit-mask-image: url("logos/icons/eye.svg");                    mask-image: url("logos/icons/eye.svg"); }
+  .ic-receipt                { -webkit-mask-image: url("logos/icons/receipt.svg");                mask-image: url("logos/icons/receipt.svg"); }
+  .ic-route                  { -webkit-mask-image: url("logos/icons/route.svg");                  mask-image: url("logos/icons/route.svg"); }
+  .ic-marker-pin-04          { -webkit-mask-image: url("logos/icons/marker-pin-04.svg");          mask-image: url("logos/icons/marker-pin-04.svg"); }
+  .ic-currency-dollar-circle { -webkit-mask-image: url("logos/icons/currency-dollar-circle.svg"); mask-image: url("logos/icons/currency-dollar-circle.svg"); }
+  .ic-sale-03                { -webkit-mask-image: url("logos/icons/sale-03.svg");                mask-image: url("logos/icons/sale-03.svg"); }
+  .ic-package                { -webkit-mask-image: url("logos/icons/package.svg");                mask-image: url("logos/icons/package.svg"); }
+  .ic-truck-01               { -webkit-mask-image: url("logos/icons/truck-01.svg");               mask-image: url("logos/icons/truck-01.svg"); }
+  .ic-grid-01                { -webkit-mask-image: url("logos/icons/grid-01.svg");                mask-image: url("logos/icons/grid-01.svg"); }
+  .ic-git-merge              { -webkit-mask-image: url("logos/icons/git-merge.svg");              mask-image: url("logos/icons/git-merge.svg"); }
+  .ic-scan                   { -webkit-mask-image: url("logos/icons/scan.svg");                   mask-image: url("logos/icons/scan.svg"); }
+  .ic-shield-tick            { -webkit-mask-image: url("logos/icons/shield-tick.svg");            mask-image: url("logos/icons/shield-tick.svg"); }
+  .ic-bar-chart-08           { -webkit-mask-image: url("logos/icons/bar-chart-08.svg");           mask-image: url("logos/icons/bar-chart-08.svg"); }
+  .ic-gift-01                { -webkit-mask-image: url("logos/icons/gift-01.svg");                mask-image: url("logos/icons/gift-01.svg"); }
+  .ic-edit                   { -webkit-mask-image: url("logos/icons/edit.svg");                   mask-image: url("logos/icons/edit.svg"); }
+  .ic-dataflow-01            { -webkit-mask-image: url("logos/icons/dataflow-01.svg");            mask-image: url("logos/icons/dataflow-01.svg"); }
+  .ic-layers-three-01        { -webkit-mask-image: url("logos/icons/layers-three-01.svg");        mask-image: url("logos/icons/layers-three-01.svg"); }
+  .ic-filter-lines           { -webkit-mask-image: url("logos/icons/filter-lines.svg");           mask-image: url("logos/icons/filter-lines.svg"); }
+  .ic-file-03                { -webkit-mask-image: url("logos/icons/file-03.svg");                mask-image: url("logos/icons/file-03.svg"); }
+  .ic-calendar-check-01      { -webkit-mask-image: url("logos/icons/calendar-check-01.svg");      mask-image: url("logos/icons/calendar-check-01.svg"); }
+  .ic-globe-01               { -webkit-mask-image: url("logos/icons/globe-01.svg");               mask-image: url("logos/icons/globe-01.svg"); }
+  .ic-alert-triangle         { -webkit-mask-image: url("logos/icons/alert-triangle.svg");         mask-image: url("logos/icons/alert-triangle.svg"); }
+  .ic-refresh-ccw-01         { -webkit-mask-image: url("logos/icons/refresh-ccw-01.svg");         mask-image: url("logos/icons/refresh-ccw-01.svg"); }
+  .ic-shopping-cart-01       { -webkit-mask-image: url("logos/icons/shopping-cart-01.svg");       mask-image: url("logos/icons/shopping-cart-01.svg"); }
+  .ic-cube-01                { -webkit-mask-image: url("logos/icons/cube-01.svg");                mask-image: url("logos/icons/cube-01.svg"); }
+  .ic-tablet-01              { -webkit-mask-image: url("logos/icons/tablet-01.svg");              mask-image: url("logos/icons/tablet-01.svg"); }
+  .ic-puzzle-piece-01        { -webkit-mask-image: url("logos/icons/puzzle-piece-01.svg");        mask-image: url("logos/icons/puzzle-piece-01.svg"); }
+
+  .f-tile-text {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .f-tile-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    display: block;
+  }
+  .f-tile-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+    line-height: 1.2;
+    display: block;
+  }
+  @media (min-width: 540px) {
+    .f-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (min-width: 800px) {
+    .f-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  }
+  @media (min-width: 1100px) {
+    .f-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+
+  /* Pinned bottom panel (always visible) */
+  .f-hero-bottom {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 50;
+    background: var(--bg);
+    border-top: 1px solid var(--line-2);
+    padding: 24px 22px calc(24px + env(safe-area-inset-bottom));
+    text-align: center;
+  }
+  .f-kicker {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .f-hero-bottom h1 {
+    font-family: var(--font-sans);
+    font-size: clamp(22px, 6vw, 28px);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 8px;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .f-hero-bottom p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-3);
+    margin: 0 auto 18px;
+    max-width: 460px;
+  }
+  .f-hero-bottom .btn {
+    width: 100%;
+    max-width: 420px;
+    height: 54px;
+    font-size: 15px;
+  }
+  /* Reserve room at the page bottom so content can scroll past the pinned panel */
+  main {
+    padding-bottom: 280px;
+  }
+
+  /* Modal — centered popup */
+  .f-sheet-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20,20,19,.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+    z-index: 80;
+  }
+  .f-sheet-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .f-sheet {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: calc(100% - 40px);
+    max-width: 420px;
+    background: var(--bg);
+    border-radius: 24px;
+    z-index: 90;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+    transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px -16px rgba(0,0,0,.35);
+  }
+  .f-sheet.is-open {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+  }
+  .f-sheet-handle { display: none; }
+  .f-sheet-inner {
+    padding: 28px 24px 32px;
+    text-align: center;
+  }
+  .f-sheet-icon {
+    width: 88px; height: 88px;
+    border-radius: 22px;
+    background: var(--gray-2);
+    display: grid; place-items: center;
+    margin: 8px auto 18px;
+  }
+  .f-sheet-icon .ic {
+    width: 44px; height: 44px;
+    background: var(--ink);
+  }
+  .f-sheet-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .f-sheet-title h2 {
+    font-family: var(--font-sans);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .f-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    line-height: 1.5;
+  }
+  .f-tag.ai  { background: linear-gradient(120deg, #7c3aed, #ec4899); }
+  .f-tag.new { background: var(--ink); }
+  .f-sheet-desc {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-3);
+    margin: 0 auto 24px;
+    max-width: 420px;
+  }
+  .f-sheet-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 360px;
+    height: 52px;
+    font-size: 15px;
+    background: var(--bg) !important;
+    color: var(--ink) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .f-sheet-cta:hover {
+    background: var(--gray-2) !important;
+    border-color: var(--ink-3) !important;
+  }
+  .f-sheet-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 32px; height: 32px;
+    background: var(--gray-2);
+    border: 0;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    cursor: pointer;
+    color: var(--ink-2);
+  }
+  .f-sheet-close svg { width: 16px; height: 16px; }
+  .f-sheet-close:hover { background: var(--gray-3); }
+
+  /* Footer */
+  .m-footer {
+    background: var(--bg-dark);
+    color: #d1d1d1;
+    padding: 32px 22px 24px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .m-footer .brand img { height: 22px; width: auto; display: block; filter: brightness(0) invert(1); }
+  .m-footer-bottom {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #1f1f1f;
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+  }
+
+  /* =================================================================
+     TABLET / DESKTOP
+     ================================================================= */
+  @media (min-width: 720px) {
+    /* Constrain grid to a centered max-width on wider screens */
+    .f-grid-wrap { max-width: 1080px; margin: 0 auto; padding: 16px 32px 32px; }
+
+    /* Pinned panel becomes more compact on desktop so grid is visible */
+    .f-hero-bottom {
+      padding: 22px 40px calc(22px + env(safe-area-inset-bottom));
+    }
+    .f-hero-bottom h1 { font-size: 26px; margin-bottom: 6px; max-width: 720px; }
+    .f-hero-bottom p { font-size: 13px; margin-bottom: 14px; max-width: 540px; }
+    .f-hero-bottom .btn { height: 48px; max-width: 320px; }
+    /* Reserve less bottom room since panel is shorter */
+    main { padding-bottom: 220px; }
+
+    /* Filter chips a little bigger */
+    .f-chips { padding: 24px 16px 8px; }
+    .f-chip { font-size: 15px; }
+    .f-chips-inner { gap: 32px; }
+  }
+  @media (min-width: 1024px) {
+    .f-hero-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px 40px calc(18px + env(safe-area-inset-bottom));
+      text-align: left;
+    }
+    .f-hero-bottom .f-kicker,
+    .f-hero-bottom h1,
+    .f-hero-bottom p { margin: 0; }
+    .f-hero-bottom h1 { font-size: 22px; line-height: 1.2; flex: 0 0 auto; }
+    .f-hero-bottom p { font-size: 13px; flex: 1; max-width: 460px; }
+    .f-hero-bottom .btn { flex: 0 0 auto; width: auto; min-width: 200px; height: 48px; }
+    .f-hero-bottom .f-kicker { display: none; }
+    main { padding-bottom: 120px; }
+
+    /* Modal a bit larger */
+    .f-sheet { max-width: 480px; }
+  }
+
+  /* =================================================================
+     MENU OVERLAY (slide-in panel from right) — same as home page
+     ================================================================= */
+  .m-menu {
+    position: fixed; inset: 0;
+    z-index: 100;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.25s ease, visibility 0s 0.25s;
+  }
+  .m-menu.is-open {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+  }
+  .m-menu-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(20,20,19,.5);
+    border: 0; padding: 0; cursor: pointer; appearance: none;
+  }
+  .m-menu-panel {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -8px 0 32px -8px rgba(0,0,0,.15);
+  }
+  .m-menu.is-open .m-menu-panel { transform: translateX(0); }
+  .m-menu-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line-2);
+    flex-shrink: 0;
+  }
+  .m-menu-top .brand img { height: 22px; width: auto; display: block; }
+  .m-menu-close {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--ink); border-radius: 50%;
+    transition: background-color 0.15s;
+  }
+  .m-menu-close:hover { background: var(--gray-2); }
+  .m-menu-body {
+    flex: 1; overflow-y: auto;
+    padding: 24px 20px 8px;
+    display: flex; flex-direction: column; gap: 28px;
+  }
+  .m-menu-section-h {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin: 0 0 8px;
+    font-weight: 600;
+    padding-left: 12px;
+  }
+  .m-menu-item {
+    display: block;
+    padding: 12px;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: background-color 0.15s ease;
+  }
+  .m-menu-item:hover { background: var(--gray-2); }
+  .m-menu-item-title {
+    display: block;
+    font-size: 15px; font-weight: 600;
+    color: var(--ink); margin-bottom: 2px;
+    letter-spacing: -0.012em;
+  }
+  .m-menu-item-desc {
+    display: block;
+    font-size: 13px; color: var(--ink-3);
+    line-height: 1.4;
+  }
+  .m-menu-footer {
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line-2);
+    flex-shrink: 0;
+  }
+  .m-menu-footer .btn { width: 100%; }
+  @media (min-width: 600px) {
+    .m-menu-panel { max-width: 480px; }
+  }
+</style>
+</head>
+<body class="page-features">
+
+<header class="m-nav">
+  <div class="m-nav-inner">
+    <a href="home-mobile.html" class="brand" aria-label="Redo home">
+      <img src="logos/redo-logo.svg" alt="Redo" />
+    </a>
+    <span class="m-nav-spacer"></span>
+    <a href="free-trial.html" class="btn btn-primary btn-sm">Free Trial</a>
+    <button class="m-hamburger" aria-label="Open menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="4" y1="6" x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <div class="f-chips" id="featureChips" role="tablist" aria-label="Filter features">
+    <a class="f-back" href="home-mobile.html" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    </a>
+    <div class="f-chips-inner">
+      <button class="f-chip is-active" type="button" data-filter="all">All</button>
+      <button class="f-chip" type="button" data-filter="time">Save time</button>
+      <button class="f-chip" type="button" data-filter="money">Save money</button>
+    </div>
+  </div>
+
+  <div class="f-grid-wrap">
+    <div class="f-grid" id="featureGrid">
+
+      <button class="f-tile" data-id="reveal" data-icon="eye" data-cat="ai">
+        <span class="f-tile-badge">New</span>
+        <span class="f-icon"><span class="ic ic-eye"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Reveal</span><span class="f-tile-sub">Customer identity</span></span>
+      </button>
+      <button class="f-tile" data-id="landed-cost" data-icon="receipt" data-cat="money">
+        <span class="f-tile-badge">New</span>
+        <span class="f-icon"><span class="ic ic-receipt"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Landed Cost Guard</span><span class="f-tile-sub">No surprise fees</span></span>
+      </button>
+      <button class="f-tile" data-id="ai-pick" data-icon="route" data-cat="ai time">
+        <span class="f-tile-badge">New</span>
+        <span class="f-icon"><span class="ic ic-route"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">AI Pick Routes</span><span class="f-tile-sub">Optimized picking</span></span>
+      </button>
+      <button class="f-tile" data-id="address-correction" data-icon="marker-pin-04" data-cat="ai money">
+        <span class="f-tile-badge">New</span>
+        <span class="f-icon"><span class="ic ic-marker-pin-04"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">AI Address Correction</span><span class="f-tile-sub">Fix bad addresses</span></span>
+      </button>
+
+      <button class="f-tile" data-id="rate-shopping" data-icon="currency-dollar-circle" data-cat="money">
+        <span class="f-icon"><span class="ic ic-currency-dollar-circle"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Rate shopping</span><span class="f-tile-sub">Compare carriers</span></span>
+      </button>
+      <button class="f-tile" data-id="carrier-discounts" data-icon="sale-03" data-cat="money">
+        <span class="f-icon"><span class="ic ic-sale-03"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Carrier discounts</span><span class="f-tile-sub">Negotiated rates</span></span>
+      </button>
+      <button class="f-tile" data-id="bulk-shipping" data-icon="package" data-cat="time">
+        <span class="f-icon"><span class="ic ic-package"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Bulk shipping</span><span class="f-tile-sub">Mass labels</span></span>
+      </button>
+      <button class="f-tile" data-id="freight" data-icon="truck-01" data-cat="money">
+        <span class="f-icon"><span class="ic ic-truck-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Freight shipments</span><span class="f-tile-sub">LTL &amp; freight</span></span>
+      </button>
+
+      <button class="f-tile" data-id="auto-batching" data-icon="grid-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-grid-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Auto batching</span><span class="f-tile-sub">Group by rule</span></span>
+      </button>
+      <button class="f-tile" data-id="auto-merge" data-icon="git-merge" data-cat="time money">
+        <span class="f-icon"><span class="ic ic-git-merge"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Auto order merge</span><span class="f-tile-sub">Combine orders</span></span>
+      </button>
+      <button class="f-tile" data-id="scan-verify" data-icon="scan" data-cat="time">
+        <span class="f-icon"><span class="ic ic-scan"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Scan to verify</span><span class="f-tile-sub">Barcode QA</span></span>
+      </button>
+
+      <button class="f-tile" data-id="proactive-claims" data-icon="shield-tick" data-cat="ai money">
+        <span class="f-icon"><span class="ic ic-shield-tick"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Carrier claims</span><span class="f-tile-sub">Auto-filed</span></span>
+      </button>
+      <button class="f-tile" data-id="ai-analytics" data-icon="bar-chart-08" data-cat="ai">
+        <span class="f-icon"><span class="ic ic-bar-chart-08"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">AI Analytics</span><span class="f-tile-sub">Performance insights</span></span>
+      </button>
+      <button class="f-tile" data-id="personalized-slips" data-icon="gift-01" data-cat="">
+        <span class="f-icon"><span class="ic ic-gift-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Personalized Slips</span><span class="f-tile-sub">Branded inserts</span></span>
+      </button>
+
+      <button class="f-tile" data-id="order-editing" data-icon="edit" data-cat="time">
+        <span class="f-icon"><span class="ic ic-edit"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Order editing</span><span class="f-tile-sub">Post-purchase changes</span></span>
+      </button>
+      <button class="f-tile" data-id="automation-rules" data-icon="dataflow-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-dataflow-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Automation rules</span><span class="f-tile-sub">Smart workflows</span></span>
+      </button>
+      <button class="f-tile" data-id="multi-location" data-icon="layers-three-01" data-cat="time money">
+        <span class="f-icon"><span class="ic ic-layers-three-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Multi-location routing</span><span class="f-tile-sub">Nearest warehouse</span></span>
+      </button>
+      <button class="f-tile" data-id="custom-views" data-icon="filter-lines" data-cat="time">
+        <span class="f-icon"><span class="ic ic-filter-lines"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Custom views</span><span class="f-tile-sub">Saved filters</span></span>
+      </button>
+
+      <button class="f-tile" data-id="custom-slips" data-icon="file-03" data-cat="time">
+        <span class="f-icon"><span class="ic ic-file-03"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Custom packing slips</span><span class="f-tile-sub">Branded slips</span></span>
+      </button>
+      <button class="f-tile" data-id="pickups-manifests" data-icon="calendar-check-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-calendar-check-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Pickups &amp; manifests</span><span class="f-tile-sub">EOD batch</span></span>
+      </button>
+
+      <button class="f-tile" data-id="international" data-icon="globe-01" data-cat="money">
+        <span class="f-icon"><span class="ic ic-globe-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">International &amp; customs</span><span class="f-tile-sub">Cross-border</span></span>
+      </button>
+      <button class="f-tile" data-id="dim-warnings" data-icon="alert-triangle" data-cat="money">
+        <span class="f-icon"><span class="ic ic-alert-triangle"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Dimension warnings</span><span class="f-tile-sub">Dim-weight alerts</span></span>
+      </button>
+      <button class="f-tile" data-id="return-labels" data-icon="refresh-ccw-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-refresh-ccw-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Return label carriers</span><span class="f-tile-sub">Per-shipment carriers</span></span>
+      </button>
+
+      <button class="f-tile" data-id="checkout-rates" data-icon="shopping-cart-01" data-cat="money">
+        <span class="f-icon"><span class="ic ic-shopping-cart-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Live rate at checkout</span><span class="f-tile-sub">Real-time rates</span></span>
+      </button>
+      <button class="f-tile" data-id="bin-management" data-icon="cube-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-cube-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Bin management</span><span class="f-tile-sub">Bin-level inventory</span></span>
+      </button>
+      <button class="f-tile" data-id="ipad-tools" data-icon="tablet-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-tablet-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">iPad warehouse tools</span><span class="f-tile-sub">Floor app</span></span>
+      </button>
+
+      <button class="f-tile" data-id="integrations" data-icon="puzzle-piece-01" data-cat="time">
+        <span class="f-icon"><span class="ic ic-puzzle-piece-01"></span></span>
+        <span class="f-tile-text"><span class="f-tile-label">Sales channels</span><span class="f-tile-sub">One-click connect</span></span>
+      </button>
+
+    </div>
+  </div>
+
+</main>
+
+<section class="f-hero-bottom">
+  <span class="f-kicker">Features</span>
+  <h1>Pick a tool. Try it free. Ship cheaper today.</h1>
+  <p>Tap any feature to see how it works. Start a free trial and ship cheaper today, no credit card required.</p>
+  <a href="free-trial.html" class="btn btn-primary btn-lg">Start your free trial</a>
+</section>
+
+<!-- Bottom-sheet modal -->
+<div class="f-sheet-backdrop" id="sheetBackdrop"></div>
+<div class="f-sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
+  <div class="f-sheet-handle"></div>
+  <button class="f-sheet-close" id="sheetClose" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="f-sheet-inner">
+    <div class="f-sheet-icon" id="sheetIcon"></div>
+    <div class="f-sheet-title">
+      <h2 id="sheetTitle">Feature</h2>
+    </div>
+    <p class="f-sheet-desc" id="sheetDesc">Description</p>
+    <a href="free-trial.html" class="btn btn-primary f-sheet-cta" id="sheetCta">Try it free</a>
+  </div>
+</div>
+
+<!-- Slide-in product menu -->
+<div class="m-menu" id="m-menu" aria-hidden="true">
+  <button class="m-menu-backdrop" id="m-menu-backdrop" aria-label="Close menu"></button>
+  <div class="m-menu-panel" role="dialog" aria-modal="true" aria-label="Product menu">
+    <div class="m-menu-top">
+      <a href="home-mobile.html" class="brand" aria-label="Redo home">
+        <img src="logos/redo-logo.svg" alt="Redo" />
+      </a>
+      <button class="m-menu-close" id="m-menu-close" aria-label="Close menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="m-menu-body">
+      <div class="m-menu-section">
+        <h4 class="m-menu-section-h">Acquire</h4>
+        <a class="m-menu-item" href="https://redo.com/products/email-sms"><span class="m-menu-item-title">Email &amp; SMS</span><span class="m-menu-item-desc">1:1 personalization that actually converts</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/recover"><span class="m-menu-item-title">Recover</span><span class="m-menu-item-desc">Real conversations that win back carts</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/agentic-catalog"><span class="m-menu-item-title">Agentic Catalog</span><span class="m-menu-item-desc">Grow your brand through AI channels</span></a>
+      </div>
+      <div class="m-menu-section">
+        <h4 class="m-menu-section-h">Convert</h4>
+        <a class="m-menu-item" href="https://redo.com/products/ai-sales-support"><span class="m-menu-item-title">AI Sales &amp; Support</span><span class="m-menu-item-desc">Every conversation, one AI-powered inbox</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/checkout-optimization"><span class="m-menu-item-title">Conversion Optimization</span><span class="m-menu-item-desc">Turn checkout into your biggest growth lever</span></a>
+      </div>
+      <div class="m-menu-section">
+        <h4 class="m-menu-section-h">Fulfill</h4>
+        <a class="m-menu-item" href="https://redo.com/products/order-editing"><span class="m-menu-item-title">Order Editing</span><span class="m-menu-item-desc">Let shoppers fix orders before you do</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/shipping-fulfillment"><span class="m-menu-item-title">Shipping &amp; Fulfillment</span><span class="m-menu-item-desc">Ship faster. Ship smarter. Ship cheaper.</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/order-tracking"><span class="m-menu-item-title">Order Tracking</span><span class="m-menu-item-desc">Boost sales on every shipment</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/inventory-management"><span class="m-menu-item-title">Inventory Management</span><span class="m-menu-item-desc">Let AI see your inventory future</span></a>
+      </div>
+      <div class="m-menu-section">
+        <h4 class="m-menu-section-h">Retain</h4>
+        <a class="m-menu-item" href="https://redo.com/products/returns"><span class="m-menu-item-title">Returns &amp; Claims</span><span class="m-menu-item-desc">Retain revenue before refunds happen</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/warranties"><span class="m-menu-item-title">Warranties</span><span class="m-menu-item-desc">Warranties as a tool to build lifelong customers</span></a>
+        <a class="m-menu-item" href="https://redo.com/products/chargebacks"><span class="m-menu-item-title">Chargebacks</span><span class="m-menu-item-desc">Win disputes you should never lose</span></a>
+      </div>
+    </div>
+    <div class="m-menu-footer">
+      <a href="free-trial.html" class="btn btn-primary btn-lg">Start free trial</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Product menu open/close
+  (function(){
+    var menu = document.getElementById('m-menu');
+    if (!menu) return;
+    var hamburger = document.querySelector('.m-hamburger, .trial-hamburger');
+    var closeBtn = document.getElementById('m-menu-close');
+    var backdrop = document.getElementById('m-menu-backdrop');
+    function openMenu(){
+      menu.classList.add('is-open');
+      menu.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu(){
+      menu.classList.remove('is-open');
+      menu.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    if (hamburger) hamburger.addEventListener('click', openMenu);
+    if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+    if (backdrop) backdrop.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && menu.classList.contains('is-open')) closeMenu();
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    var FEATURES = {
+      'rate-shopping': { title: 'Rate Shopping', desc: 'Auto-compare USPS, UPS, FedEx, DHL, Amazon, and regional carriers on every package for the cheapest or fastest option.', cta: 'Start rate shopping' },
+      'carrier-discounts': { title: 'Carrier Discounts', desc: 'Redo’s negotiated carrier contracts stack on top of your own — like Amazon USPS rates that save 30–40¢ per label.', cta: 'Get carrier discounts' },
+      'bulk-shipping': { title: 'Bulk Shipping', desc: 'Print hundreds of identical labels at once. One click, every carrier supported.', cta: 'Start bulk shipping' },
+      'freight': { title: 'Freight Shipments', desc: 'LTL and freight quotes built right in alongside parcel. Same booking flow, every major freight carrier.', cta: 'Start shipping freight' },
+
+      'auto-batching': { title: 'Auto Order Batching', desc: 'Intelligent auto-batching by location, inventory, and shipping method. Brands see ~35% fulfillment-time reduction.', cta: 'Start batching' },
+      'auto-merge': { title: 'Auto Order Merge', desc: 'Two orders from the same customer? Redo combines them into one box and one label automatically.', cta: 'Enable auto-merge' },
+      'ai-pick': { title: 'AI Pick Routes', desc: 'Optimized picking paths through your warehouse. Workers walk less, pick faster, and never miss a SKU.', cta: 'Try AI Pick Routes', tag: 'AI' },
+      'scan-verify': { title: 'Scan to Verify', desc: 'Barcode-verify every item against the order before sealing the box. Brands see a 97% error reduction.', cta: 'Start scanning' },
+
+      'proactive-claims': { title: 'AI Carrier Claim Submission', desc: 'Auto-files claims across UPS, USPS, FedEx, DHL, and Amazon the moment a package goes missing or damaged.', cta: 'Start covering claims', tag: 'AI' },
+      'address-correction': { title: 'AI Address Correction', desc: 'Google Address Autofill plus an Auto-Updated Addresses KPI. Action Items flag address errors and can hold the order before it ships.', cta: 'Fix addresses', tag: 'AI' },
+      'ai-analytics': { title: 'AI Analytics', desc: 'Analytics + OMS dashboards covering cost per label, fulfillment time, carrier performance, and team productivity.', cta: 'Open analytics', tag: 'AI' },
+      'landed-cost': { title: 'Landed Cost Guard', desc: 'Protects you against surprise carrier surcharges. Six brands live as of May, more rolling out weekly.', cta: 'Turn on Landed Cost' },
+
+      'reveal': { title: 'Reveal', desc: 'Know who your customers really are — identity, lifetime value, and the channels that drive each repeat purchase.', cta: 'Try Reveal', tag: 'New' },
+      'personalized-slips': { title: 'Personalized Slips', desc: 'Custom inserts (packing slips, thank-you notes, discount offers) printed on each outbound shipment, personalized per customer.', cta: 'Add inserts' },
+
+      'order-editing': { title: 'Order Editing', desc: 'Post-purchase order changes (size, color, address) before shipment, all from one place.', cta: 'Enable editing' },
+      'automation-rules': { title: 'Automation Rules', desc: 'Auto-route orders by weight, destination, cost, SKU, or channel. Build the workflow once, run it forever.', cta: 'Build a rule' },
+      'multi-location': { title: 'Multi-Location Routing', desc: 'Routes orders to the nearest warehouse that has stock. Cheaper shipping, faster delivery.', cta: 'Set up routing' },
+      'custom-views': { title: 'Custom Views', desc: 'Filtered order views by channel, tag, status, or carrier. Save the views your team uses every day.', cta: 'Make a view' },
+
+      'custom-slips': { title: 'Custom Packing Slips', desc: 'Branded packing slips with conditional logic. Show different content per channel, region, or product line.', cta: 'Customize slips' },
+      'pickups-manifests': { title: 'Pickups, EOD Manifests & Void Labels', desc: 'Schedule carrier pickups, generate end-of-day manifests, and void unused labels in one click.', cta: 'Schedule a pickup' },
+
+      'international': { title: 'International & Customs', desc: 'Customs documents and variant-level HS codes generated automatically for every cross-border shipment.', cta: 'Ship internationally' },
+      'dim-warnings': { title: 'Dimension Threshold Warnings', desc: 'Flags potential dim-weight surcharges before you buy the label, so you can repack and save.', cta: 'Turn on warnings' },
+      'return-labels': { title: 'Return Label Carrier Selection', desc: 'Pick the optimal return carrier per shipment, not per account. Plus improved CSV export with subtotal, tax, and delivery date.', cta: 'Configure returns' },
+
+      'checkout-rates': { title: 'Live Rate at Checkout', desc: 'Real-time carrier rates served right in your checkout. Shoppers pick how fast (and how cheap) they want it.', cta: 'Connect checkout' },
+      'bin-management': { title: 'Bin Management', desc: 'Bin-level inventory tracking with barcode scanning at the bin. Know exactly where every SKU lives.', cta: 'Set up bins' },
+      'ipad-tools': { title: 'iPad Warehouse Tools', desc: 'iPad-native pick sessions, scanning, and floor workflows. Built for the warehouse, not the office.', cta: 'Get the iPad app' },
+
+      'integrations': { title: 'Instant Sales Channel Connection', desc: 'One-click connect to Shopify, WooCommerce, Linnworks, Amazon FBM, Shopline, plus carrier integrations like Uni Uni.', cta: 'Connect a channel' }
+    };
+
+    var sheet = document.getElementById('sheet');
+    var backdrop = document.getElementById('sheetBackdrop');
+    var titleEl = document.getElementById('sheetTitle');
+    var descEl = document.getElementById('sheetDesc');
+    var ctaEl = document.getElementById('sheetCta');
+    var iconEl = document.getElementById('sheetIcon');
+    var closeBtn = document.getElementById('sheetClose');
+
+    function openFor(id, tileEl){
+      var f = FEATURES[id];
+      if (!f) return;
+      titleEl.textContent = f.title;
+      descEl.textContent = f.desc;
+      ctaEl.textContent = f.cta || 'Try it free';
+      // Re-render the modal icon using the tile's data-icon name
+      var iconName = tileEl.getAttribute('data-icon');
+      iconEl.innerHTML = iconName ? '<span class="ic ic-' + iconName + '"></span>' : '';
+      sheet.classList.add('is-open');
+      backdrop.classList.add('is-open');
+      sheet.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSheet(){
+      sheet.classList.remove('is-open');
+      backdrop.classList.remove('is-open');
+      sheet.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.f-tile').forEach(function(tile){
+      tile.addEventListener('click', function(){
+        openFor(tile.dataset.id, tile);
+      });
+    });
+
+    // Chip filter
+    var chips = document.querySelectorAll('#featureChips .f-chip');
+    var tiles = document.querySelectorAll('.f-tile');
+    chips.forEach(function(chip){
+      chip.addEventListener('click', function(){
+        chips.forEach(function(c){ c.classList.remove('is-active'); });
+        chip.classList.add('is-active');
+        var filter = chip.dataset.filter;
+        tiles.forEach(function(t){
+          if (filter === 'all') {
+            t.hidden = false;
+          } else {
+            var cats = (t.dataset.cat || '').split(/\s+/);
+            t.hidden = !cats.includes(filter);
+          }
+        });
+      });
+    });
+    backdrop.addEventListener('click', closeSheet);
+    closeBtn.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') closeSheet();
+    });
+  })();
+</script>
+</body>
+</html>
