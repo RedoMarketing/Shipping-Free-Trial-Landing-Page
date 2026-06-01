@@ -6,7 +6,7 @@ Mobile-first marketing site for Redo's Shipping Cloud (OMS / WMS / IMS) signup f
 
 | File | Purpose |
 | --- | --- |
-| `home-mobile.html` | Main landing page — hero, integrations, brand marquee, why cards, feature carousel, stats, support, signup, footer. **Set this as the index route in production.** |
+| `index.html` | Main landing page — hero, integrations, brand marquee, why cards, feature carousel, stats, support, signup, footer. Served at `/`. |
 | `features.html` | All 27 Shipping Cloud features as a tile grid with click-to-expand modals, filterable by category. Linked from "View all features". |
 | `free-trial.html` | Signup form. Submits to HubSpot, then redirects to Dom Lewis's demo booking calendar. |
 | `styles.css` | Shared design tokens (colors, radii, fonts). All page-specific styles live inline in each HTML file. |
@@ -47,7 +47,7 @@ python3 -m http.server 5173
 npx serve -l 5173
 ```
 
-Then open `http://localhost:5173/home-mobile.html`.
+Then open `http://localhost:5173/`.
 
 ## Railway deployment
 
@@ -66,8 +66,7 @@ Easiest static-site setup is `serve` over Node:
      }
    }
    ```
-2. Push to Railway — it auto-detects Node, installs `serve`, runs `npm start`.
-3. (Optional) Add routing so `/` serves `home-mobile.html` — either rename `home-mobile.html` → `index.html` or set up a redirect.
+2. Push to Railway — it auto-detects Node, installs `serve`, runs `npm start`. `index.html` will be served at `/` automatically.
 
 Alternative: any Nginx, Caddy, or Cloudflare Pages setup works — it's just static files.
 

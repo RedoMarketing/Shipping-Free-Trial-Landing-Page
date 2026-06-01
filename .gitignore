@@ -8,6 +8,6 @@ node_modules/
 # Older/unrelated files in this workspace — not part of the landing page
 RESTRUCTURE_PLAN.md
 app.js
-index.html
+_old-desktop-index.html
 plan.html
 playground.html
