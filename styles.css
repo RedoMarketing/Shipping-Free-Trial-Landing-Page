@@ -1758,3 +1758,82 @@ img[src*="just-ingredients"] { max-height: 38px; }
 
 /* Dark mode intentionally disabled — site is always served in light mode. */
 
+/* ============================================================
+   ENZUZO COOKIE BANNER — themed to match site
+   Adapted from the snippet Jacob provided; the Webflow theme
+   vars are swapped for our actual tokens from :root above.
+   ============================================================ */
+
+/* Typography */
+.enzuzo-cookiebanner-container * {
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+}
+
+/* Override Enzuzo's color variables with our theme */
+#ez-cookie-notification {
+  --ez-banner-background-color: var(--bg) !important;
+  --ez-banner-border-color: var(--line-2) !important;
+  --ez-banner-text-color: var(--ink) !important;
+  --ez-banner-link-color: var(--ink-3) !important;
+  --ez-banner-allow-all-background-color: var(--accent) !important;
+  --ez-banner-allow-all-background-color-hover: var(--accent-deep) !important;
+  --ez-banner-allow-all-text-color: #ffffff !important;
+  --ez-banner-allow-all-border-color: transparent !important;
+  --ez-banner-decline-background-color: var(--gray-2) !important;
+  --ez-banner-decline-background-color-hover: var(--gray-3) !important;
+  --ez-banner-decline-text-color: var(--ink) !important;
+  --ez-banner-decline-border-color: var(--line-2) !important;
+}
+
+/* Shape & layout */
+.enzuzo-cookiebanner-container {
+  padding: 16px !important;
+  border-radius: var(--r-md) !important;
+}
+
+/* Button border radius */
+#ez-cookie-notification__accept,
+#ez-cookie-notification__decline {
+  border-radius: var(--r-sm) !important;
+}
+
+/* "Manage Cookies" — plain link, not a button */
+#notificationManagerLink {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: var(--ink-3) !important;
+  text-decoration: underline !important;
+}
+
+/* Soft drop shadow matching the banner radius */
+#ez-cookie-notification {
+  box-shadow: 0 8px 24px -4px rgba(20, 20, 19, 0.12) !important;
+  overflow: hidden !important;
+}
+
+/* Mobile: action buttons side-by-side, Manage Cookies link below them */
+@media only screen and (max-width: 480px) {
+  .enzuzo-notification-buttons {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #notificationManagerLink {
+    order: 2 !important;
+  }
+  .enzuzo-cookieButtonWrap {
+    order: 1 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  #ez-cookie-notification__decline,
+  #ez-cookie-notification__accept {
+    flex: 1 !important;
+  }
+}
+
