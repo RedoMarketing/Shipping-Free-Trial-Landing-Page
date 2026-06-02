@@ -1760,19 +1760,25 @@ img[src*="just-ingredients"] { max-height: 38px; }
 
 /* ============================================================
    ENZUZO COOKIE BANNER — themed to match site
-   Adapted from the snippet Jacob provided; the Webflow theme
-   vars are swapped for our actual tokens from :root above.
+   Broadened selectors so it catches any Enzuzo naming variation
+   (older .enzuzo-* classes, newer .ez-* / [id^="ez-"], etc.).
    ============================================================ */
 
-/* Typography */
-.enzuzo-cookiebanner-container * {
+/* Typography on every Enzuzo element */
+.enzuzo-cookiebanner-container *,
+[class*="enzuzo"] *,
+[id^="ez-cookie"] *,
+[id^="ez-banner"] * {
   font-family: var(--font-sans) !important;
   font-size: 14px !important;
   line-height: 1.6 !important;
 }
 
-/* Override Enzuzo's color variables with our theme */
-#ez-cookie-notification {
+/* Override Enzuzo's CSS variables wherever the root sits */
+#ez-cookie-notification,
+[id^="ez-cookie"],
+[id^="ez-banner"],
+.enzuzo-cookiebanner-container {
   --ez-banner-background-color: var(--bg) !important;
   --ez-banner-border-color: var(--line-2) !important;
   --ez-banner-text-color: var(--ink) !important;
@@ -1787,44 +1793,95 @@ img[src*="just-ingredients"] { max-height: 38px; }
   --ez-banner-decline-border-color: var(--line-2) !important;
 }
 
-/* Shape & layout */
-.enzuzo-cookiebanner-container {
-  padding: 16px !important;
+/* Banner container — direct visual styling (don't rely on Enzuzo vars alone) */
+.enzuzo-cookiebanner-container,
+#ez-cookie-notification,
+[id^="ez-cookie"][role="dialog"],
+[id^="ez-banner"] {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line-2) !important;
   border-radius: var(--r-md) !important;
+  padding: 16px !important;
+  box-shadow: 0 8px 24px -4px rgba(20, 20, 19, 0.12) !important;
+  font-family: var(--font-sans) !important;
 }
 
-/* Button border radius */
+/* Accept All — orange */
 #ez-cookie-notification__accept,
-#ez-cookie-notification__decline {
+[id*="ez-cookie"][id*="accept"],
+[class*="enzuzo"] [class*="accept"],
+button[class*="allow-all"],
+button[class*="acceptAll"] {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border: 0 !important;
   border-radius: var(--r-sm) !important;
+  padding: 10px 18px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+}
+#ez-cookie-notification__accept:hover,
+[id*="ez-cookie"][id*="accept"]:hover,
+[class*="enzuzo"] [class*="accept"]:hover,
+button[class*="allow-all"]:hover,
+button[class*="acceptAll"]:hover {
+  background: var(--accent-deep) !important;
 }
 
-/* "Manage Cookies" — plain link, not a button */
-#notificationManagerLink {
+/* Decline — gray secondary */
+#ez-cookie-notification__decline,
+[id*="ez-cookie"][id*="decline"],
+[class*="enzuzo"] [class*="decline"],
+button[class*="declineAll"] {
+  background: var(--gray-2) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line-2) !important;
+  border-radius: var(--r-sm) !important;
+  padding: 10px 18px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+}
+#ez-cookie-notification__decline:hover,
+[id*="ez-cookie"][id*="decline"]:hover,
+[class*="enzuzo"] [class*="decline"]:hover,
+button[class*="declineAll"]:hover {
+  background: var(--gray-3) !important;
+}
+
+/* "Manage Cookies" — plain underlined link, never a button */
+#notificationManagerLink,
+[id*="notificationManagerLink"],
+[class*="manage-cookies"],
+[class*="manageCookies"] {
   background: none !important;
-  border: none !important;
+  border: 0 !important;
   box-shadow: none !important;
   padding: 0 !important;
   color: var(--ink-3) !important;
   text-decoration: underline !important;
+  font-weight: 500 !important;
 }
 
-/* Soft drop shadow matching the banner radius */
-#ez-cookie-notification {
-  box-shadow: 0 8px 24px -4px rgba(20, 20, 19, 0.12) !important;
-  overflow: hidden !important;
-}
-
-/* Mobile: action buttons side-by-side, Manage Cookies link below them */
+/* Mobile: action buttons side-by-side, Manage Cookies link below */
 @media only screen and (max-width: 480px) {
-  .enzuzo-notification-buttons {
+  .enzuzo-notification-buttons,
+  [class*="enzuzo"] [class*="notification-buttons"],
+  [class*="enzuzo"] [class*="buttons"] {
     display: flex !important;
     flex-direction: column !important;
+    gap: 12px !important;
   }
-  #notificationManagerLink {
+  #notificationManagerLink,
+  [id*="notificationManagerLink"] {
     order: 2 !important;
+    align-self: center !important;
   }
-  .enzuzo-cookieButtonWrap {
+  .enzuzo-cookieButtonWrap,
+  [class*="enzuzo"] [class*="cookieButtonWrap"],
+  [class*="enzuzo"] [class*="ButtonWrap"] {
     order: 1 !important;
     display: flex !important;
     flex-direction: row !important;
@@ -1832,7 +1889,9 @@ img[src*="just-ingredients"] { max-height: 38px; }
     width: 100% !important;
   }
   #ez-cookie-notification__decline,
-  #ez-cookie-notification__accept {
+  #ez-cookie-notification__accept,
+  [id*="ez-cookie"][id*="decline"],
+  [id*="ez-cookie"][id*="accept"] {
     flex: 1 !important;
   }
 }
