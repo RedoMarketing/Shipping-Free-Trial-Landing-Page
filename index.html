@@ -1639,6 +1639,8 @@
       if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
 
       var fd = new FormData(form);
+      // Capture UTM params from the current URL so attribution lands on the contact.
+      var qs = new URLSearchParams(window.location.search);
       var allFields = [
         { objectTypeId: '0-1', name: 'firstname',      value: fd.get('firstName') || '' },
         { objectTypeId: '0-1', name: 'lastname',       value: fd.get('lastName')  || '' },
@@ -1646,7 +1648,10 @@
         { objectTypeId: '0-1', name: 'company',        value: fd.get('company')   || '' },
         { objectTypeId: '0-1', name: 'phone',          value: fd.get('phone')     || '' },
         { objectTypeId: '0-2', name: PROP_ORDER_VOLUME, value: fd.get('annualOrderVolume') || '' },
-        { objectTypeId: '0-1', name: PROP_HDYHAU,       value: fd.get('hdyhau') || '' }
+        { objectTypeId: '0-1', name: PROP_HDYHAU,       value: fd.get('hdyhau') || '' },
+        { objectTypeId: '0-1', name: 'utm_source',     value: qs.get('utm_source')   || '' },
+        { objectTypeId: '0-1', name: 'utm_medium',     value: qs.get('utm_medium')   || '' },
+        { objectTypeId: '0-1', name: 'utm_campaign',   value: qs.get('utm_campaign') || '' }
       ];
       var fields = allFields.filter(function(f){ return f.value !== ''; });
 
