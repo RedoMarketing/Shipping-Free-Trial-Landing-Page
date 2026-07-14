@@ -1403,7 +1403,11 @@
 
       <div class="m-tryfree-card">
         <h3>Create your Redo account</h3>
-        <form id="tf-form" novalidate>
+        <form id="tf-form" data-hs-do-not-collect="true" novalidate>
+          <!-- Honeypot. Hidden from humans; bots that fill every input trip it. -->
+          <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
+            <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
           <div class="m-tf-row">
             <label class="m-tf-field" style="margin:0;">
               <span>First name <em>*</em></span>
@@ -1633,12 +1637,35 @@
     var PROP_ORDER_VOLUME = 'orders_last_year';
     var PROP_HDYHAU       = 'how_did_you_hear_about_us';
 
+    // Bots fill and fire instantly; humans cannot complete this form in under 3s.
+    var MIN_FILL_MS = 3000;
+    var loadedAt = Date.now();
+
     form.addEventListener('submit', async function(e){
       e.preventDefault();
-      var btn = form.querySelector('.m-tf-submit');
-      if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
 
       var fd = new FormData(form);
+
+      // Bot traps. Fail silently and do NOT redirect — a bot that never reaches
+      // the booking calendar cannot put junk on a rep's schedule.
+      if ((fd.get('website') || '') !== '') return;
+      if (Date.now() - loadedAt < MIN_FILL_MS) return;
+
+      // The form is novalidate, so the required/type attributes in the markup were
+      // never enforced. Enforce them per-field before we hit the API.
+      var els = form.elements;
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        if (el.name === 'website') continue; // honeypot is intentionally unvalidated
+        if (el.willValidate && !el.checkValidity()) {
+          el.reportValidity();
+          el.focus();
+          return;
+        }
+      }
+
+      var btn = form.querySelector('.m-tf-submit');
+      if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
       // Capture UTM params from the current URL so attribution lands on the contact.
       var qs = new URLSearchParams(window.location.search);
       var allFields = [
@@ -1669,7 +1696,8 @@
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            keepalive: true
           }
         );
         if (!res.ok) {
