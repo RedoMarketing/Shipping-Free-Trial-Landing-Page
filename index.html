@@ -1454,6 +1454,8 @@
               <option value="Other">Other</option>
             </select>
           </label>
+          <div id="tf-ts-widget" class="cf-turnstile" style="margin-top:4px;"></div>
+          <p id="tf-error" class="m-tf-error" role="alert" hidden style="color:#c0322b;margin:0;font-size:14px;"></p>
           <button type="submit" class="m-tf-submit">Get started</button>
           <p class="m-tf-terms">By creating an account, you agree to our <a href="https://redo.com/terms-and-conditions" target="_blank" rel="noopener">Terms of Service</a> and <a href="https://redo.com/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</p>
         </form>
@@ -1620,96 +1622,109 @@
   })();
 </script>
 
+<script src="config.js"></script>
 <script>
-  // HubSpot integration for the homepage "Try Redo" form.
-  // Same setup as free-trial.html: POST to HubSpot Forms API, then redirect
-  // to Dom's demo booking calendar regardless of API result.
+  // Homepage "Try Redo" form. Submissions are proxied through our own server
+  // (server.js), which verifies a Cloudflare Turnstile token + rate-limits before
+  // forwarding to HubSpot. HubSpot portal/form IDs live in server env vars —
+  // deliberately NOT here — so the public api.hsforms.com endpoint is gone.
   (function(){
     var form = document.getElementById('tf-form');
     if (!form) return;
 
-    var HS_PORTAL = '22543403';
-    var HS_FORM   = 'e6692ec9-3bde-4702-8d75-a04658c29a9c';
+    var ENDPOINT = 'api/trial-signup';   // resolves under /shipping-free-trial/ via <base>
     var BOOKING_URL = 'https://meetings.hubspot.com/dom-lewis/donminics-booking-link';
-    // Property internal names + object types:
-    //   - orders_last_year lives on the Company object   (objectTypeId 0-2)
-    //   - how_did_you_hear_about_us lives on the Contact (objectTypeId 0-1)
-    var PROP_ORDER_VOLUME = 'orders_last_year';
-    var PROP_HDYHAU       = 'how_did_you_hear_about_us';
-
-    // Bots fill and fire instantly; humans cannot complete this form in under 3s.
-    var MIN_FILL_MS = 3000;
     var loadedAt = Date.now();
+
+    var errEl = document.getElementById('tf-error');
+    var btn = form.querySelector('.m-tf-submit');
+    var tsToken = '';
+    var tsWidgetId = null;
+
+    function showError(msg){
+      if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Get started'; }
+    }
+    function clearError(){ if (errEl) { errEl.hidden = true; errEl.textContent = ''; } }
+    function resetCaptcha(){
+      tsToken = '';
+      if (window.turnstile && tsWidgetId !== null) window.turnstile.reset(tsWidgetId);
+    }
+
+    // Turnstile explicit render — api.js is loaded async with ?onload=onTurnstileLoad.
+    window.onTurnstileLoad = function(){
+      var cfg = window.__TRIAL_CFG__ || {};
+      if (!cfg.turnstileSiteKey || !window.turnstile) return;
+      tsWidgetId = window.turnstile.render('#tf-ts-widget', {
+        sitekey: cfg.turnstileSiteKey,
+        callback: function(t){ tsToken = t; clearError(); },
+        'expired-callback': function(){ tsToken = ''; },
+        'error-callback': function(){ tsToken = ''; }
+      });
+    };
 
     form.addEventListener('submit', async function(e){
       e.preventDefault();
+      clearError();
 
       var fd = new FormData(form);
 
-      // Bot traps. Fail silently and do NOT redirect — a bot that never reaches
-      // the booking calendar cannot put junk on a rep's schedule.
-      if ((fd.get('website') || '') !== '') return;
-      if (Date.now() - loadedAt < MIN_FILL_MS) return;
-
-      // The form is novalidate, so the required/type attributes in the markup were
-      // never enforced. Enforce them per-field before we hit the API.
+      // Cheap client-side pre-filters. The authoritative checks all run server-side.
+      if ((fd.get('website') || '') !== '') return; // honeypot
       var els = form.elements;
       for (var i = 0; i < els.length; i++) {
         var el = els[i];
-        if (el.name === 'website') continue; // honeypot is intentionally unvalidated
-        if (el.willValidate && !el.checkValidity()) {
-          el.reportValidity();
-          el.focus();
-          return;
-        }
+        if (el.name === 'website') continue;
+        if (el.willValidate && !el.checkValidity()) { el.reportValidity(); el.focus(); return; }
       }
+      // Require the token only if Turnstile is configured (site key present).
+      var cfg = window.__TRIAL_CFG__ || {};
+      if (cfg.turnstileSiteKey && !tsToken) { showError('Please complete the "I am not a robot" check.'); return; }
 
-      var btn = form.querySelector('.m-tf-submit');
       if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
-      // Capture UTM params from the current URL so attribution lands on the contact.
-      var qs = new URLSearchParams(window.location.search);
-      var allFields = [
-        { objectTypeId: '0-1', name: 'firstname',      value: fd.get('firstName') || '' },
-        { objectTypeId: '0-1', name: 'lastname',       value: fd.get('lastName')  || '' },
-        { objectTypeId: '0-1', name: 'email',          value: fd.get('email')     || '' },
-        { objectTypeId: '0-1', name: 'company',        value: fd.get('company')   || '' },
-        { objectTypeId: '0-1', name: 'phone',          value: fd.get('phone')     || '' },
-        { objectTypeId: '0-2', name: PROP_ORDER_VOLUME, value: fd.get('annualOrderVolume') || '' },
-        { objectTypeId: '0-1', name: PROP_HDYHAU,       value: fd.get('hdyhau') || '' },
-        { objectTypeId: '0-1', name: 'utm_source',     value: qs.get('utm_source')   || '' },
-        { objectTypeId: '0-1', name: 'utm_medium',     value: qs.get('utm_medium')   || '' },
-        { objectTypeId: '0-1', name: 'utm_campaign',   value: qs.get('utm_campaign') || '' }
-      ];
-      var fields = allFields.filter(function(f){ return f.value !== ''; });
 
+      // Capture UTM params so attribution lands on the contact.
+      var qs = new URLSearchParams(window.location.search);
       var payload = {
-        fields: fields,
-        context: {
-          pageUri: window.location.href,
-          pageName: document.title
-        }
+        firstName:         fd.get('firstName') || '',
+        lastName:          fd.get('lastName')  || '',
+        email:             fd.get('email')     || '',
+        company:           fd.get('company')   || '',
+        phone:             fd.get('phone')     || '',
+        annualOrderVolume: fd.get('annualOrderVolume') || '',
+        hdyhau:            fd.get('hdyhau')     || '',
+        utm_source:        qs.get('utm_source')   || '',
+        utm_medium:        qs.get('utm_medium')   || '',
+        utm_campaign:      qs.get('utm_campaign') || '',
+        website:           fd.get('website')    || '', // honeypot (server re-checks)
+        turnstileToken:    tsToken,
+        elapsedMs:         Date.now() - loadedAt,
+        pageUri:           window.location.href,
+        pageName:          document.title
       };
 
       try {
-        var res = await fetch(
-          'https://api.hsforms.com/submissions/v3/integration/submit/' + HS_PORTAL + '/' + HS_FORM,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            keepalive: true
-          }
-        );
-        if (!res.ok) {
-          var body = await res.text();
-          console.error('HubSpot submission failed:', res.status, body);
+        var res = await fetch(ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        var data = {};
+        try { data = await res.json(); } catch (_) {}
+        if (res.ok && data.ok) {
+          if (btn) btn.textContent = 'Redirecting...';
+          window.location.href = BOOKING_URL;
+          return;
         }
+        resetCaptcha();
+        showError(res.status === 429
+          ? 'Too many attempts. Please wait a moment and try again.'
+          : 'Something went wrong. Please try again.');
       } catch (err) {
-        console.error('HubSpot submission error:', err);
+        console.error('Signup submission error:', err);
+        resetCaptcha();
+        showError('Network error. Please try again.');
       }
-
-      if (btn) btn.textContent = 'Redirecting...';
-      window.location.href = BOOKING_URL;
     });
   })();
 
@@ -1794,5 +1809,6 @@
     }, { passive: true });
   })();
 </script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
 </body>
 </html>
