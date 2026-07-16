@@ -485,7 +485,8 @@
     // HubSpot portal/form IDs live in server env vars — deliberately NOT here, so
     // the public api.hsforms.com endpoint bots were POSTing to no longer exists.
     var ENDPOINT = 'api/trial-signup';   // resolves under /shipping-free-trial/ via <base>
-    var BOOKING_URL = 'https://meetings.hubspot.com/dom-lewis/donminics-booking-link';
+    // The booking URL is intentionally NOT here — the server returns it only after
+    // a verified submission, so it never appears in page source for bots to scrape.
     var loadedAt = Date.now();
 
     var errEl = document.getElementById('trial-error');
@@ -564,8 +565,12 @@
         var data = {};
         try { data = await res.json(); } catch (_) {}
         if (res.ok && data.ok) {
-          if (btn) btn.textContent = 'Redirecting...';
-          window.location.href = BOOKING_URL;
+          if (data.bookingUrl) {
+            if (btn) btn.textContent = 'Redirecting...';
+            window.location.href = data.bookingUrl;
+          } else if (btn) {
+            btn.textContent = 'Submitted — we’ll be in touch';
+          }
           return;
         }
         resetCaptcha();

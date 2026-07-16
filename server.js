@@ -22,6 +22,12 @@ const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || "";   // public, ex
 const TURNSTILE_SECRET   = process.env.TURNSTILE_SECRET   || "";   // private, server-only
 const HS_PORTAL          = process.env.HS_PORTAL          || "";
 const HS_FORM            = process.env.HS_FORM            || "";
+// The booking calendar URL is returned to the browser ONLY after a submission
+// passes Turnstile + validation — it is never in the page source, so bots can't
+// scrape it. Set BOOKING_URL in Railway; rotating the meeting-link slug there
+// (without a code change) kills any slug bots have cached. Falls back to the
+// current link so a deploy before the env var is set doesn't dead-end the flow.
+const BOOKING_URL        = process.env.BOOKING_URL || "https://meetings.hubspot.com/dom-lewis/donminics-booking-link";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 // HubSpot property internal names + object types (mirrors the old client mapping):
@@ -209,7 +215,8 @@ app.post(`${BASE}/api/trial-signup`, express.json({ limit: "16kb" }), async (req
     return res.status(502).json({ ok: false, error: "hubspot_error" });
   }
 
-  return res.status(200).json({ ok: true });
+  // Verified submission — only now do we hand back the booking URL.
+  return res.status(200).json({ ok: true, bookingUrl: BOOKING_URL });
 });
 
 app.use(BASE, express.static(__dirname, { extensions: ["html"] }));
