@@ -27,7 +27,7 @@ const HS_FORM            = process.env.HS_FORM            || "";
 // scrape it. Set BOOKING_URL in Railway; rotating the meeting-link slug there
 // (without a code change) kills any slug bots have cached. Falls back to the
 // current link so a deploy before the env var is set doesn't dead-end the flow.
-const BOOKING_URL        = process.env.BOOKING_URL || "https://meetings.hubspot.com/dom-lewis/donminics-booking-link";
+const BOOKING_URL        = process.env.BOOKING_URL || "https://meetings.hubspot.com/dom-lewis/donminics-shipping-and-fulfillment-link";
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 // HubSpot property internal names + object types (mirrors the old client mapping):
